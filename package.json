@@ -1,10 +1,10 @@
 {
   "name": "clientjs",
-  "version": "0.2.1",
+  "version": "0.2.1-optimized.1",
   "homepage": "https://clientjs.org",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jackspirou/clientjs.git"
+    "url": "https://github.com/escmHEX/clientjs-optimized.git"
   },
   "description": "Device information and digital fingerprinting written in pure JavaScript.",
   "keywords": [
@@ -29,20 +29,21 @@
     }
   ],
   "bugs": {
-    "url": "https://github.com/jackspirou/clientjs/issues"
+    "url": "https://github.com/escmHEX/clientjs-optimized/issues"
   },
   "scripts": {
     "build": "webpack -c webpack.config.js",
-    "checks": "npm run lint && npm test && npm run build",
-    "lint": "eslint --fix '**/*.js'",
-    "lint:check": "eslint '**/*.js'",
+    "checks": "npm run lint:check && npm test && npm run build",
+    "lint": "eslint --fix \"**/*.js\"",
+    "lint:check": "eslint \"**/*.js\"",
     "postinstall": "node scripts/install.js",
-    "posttest": "npm run test:aircover",
     "prepare": "husky install",
     "prepublishOnly": "npm run checks",
     "preversion": "npm run checks",
-    "test": "npm run test:local",
+    "test": "npm run test:fonts && npm run test:headless",
     "test:local": "karma start karma/local.conf.js",
+    "test:fonts": "node --test test/font-detection.test.cjs",
+    "test:headless": "karma start karma/headless.conf.js",
     "test:aircover": "karma start karma/aircover.conf.js",
     "test:drone": "karma start karma/drone.conf.js"
   },

@@ -1,0 +1,5 @@
+# Keep source maps and release checksums reproducible across Windows and Unix.
+*.js text eol=lf
+*.cjs text eol=lf
+*.json text eol=lf
+*.map text eol=lf

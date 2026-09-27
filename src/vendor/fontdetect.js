@@ -66,4 +66,35 @@ module.exports = function Detector() {
     }
 
     this.detect = detect;
+
+    // AgarCity: batch only the font-list probe. Keep the constructor's original
+    // generic metrics and public single-font detector unchanged.
+    this.detectMany = function(fonts) {
+        var nodes = [];
+        var fragment = document.createDocumentFragment();
+        for (var i = 0; i < fonts.length; i++) {
+            for (var j = 0; j < baseFonts.length; j++) {
+                var node = s.cloneNode(true);
+                node.style.fontFamily = fonts[i] + ',' + baseFonts[j];
+                nodes.push(node);
+                fragment.appendChild(node);
+            }
+        }
+        h.appendChild(fragment);
+        var results = [];
+        try {
+            for (var i = 0; i < fonts.length; i++) {
+                var detected = false;
+                for (var j = 0; j < baseFonts.length; j++) {
+                    var node = nodes[i * baseFonts.length + j];
+                    var matched = node.offsetWidth != defaultWidth[baseFonts[j]] || node.offsetHeight != defaultHeight[baseFonts[j]];
+                    detected = detected || matched;
+                }
+                results.push(detected);
+            }
+        } finally {
+            for (var i = 0; i < nodes.length; i++) h.removeChild(nodes[i]);
+        }
+        return results;
+    };
 };
