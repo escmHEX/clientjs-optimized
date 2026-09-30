@@ -17,6 +17,20 @@ unchanged. The call stays synchronous, with no persistent result cache or delay.
 
 ## Build and validation
 
+Version `0.2.1-optimized.2` adds optional `ClientJS.prepareFonts({ batchSize: 10 })`
+to all four builds. Call it with a parsed document body while awaiting independent
+startup data. It returns a cancellation function: call that before the normal
+synchronous `new ClientJS().getFingerprint()` (or when abandoning startup).
+
+On Blink it warms native font resolution in separate tasks, using one fallback
+probe per font. Results are discarded; the original three-fallback detector still
+measures the current DOM and font state at the final call. Declared `FontFace`s
+are excluded on every task, including unloaded faces, to avoid starting web font
+downloads early. Other engines do no preparation. There is no persistent result
+cache and callers that omit preparation retain the previous behavior. Smaller
+batches bound individual tasks at the expense of timer scheduling and repeated
+layout work; validate the tradeoff in the consuming page.
+
 Use the committed package lock. Do not update dependencies as part of this patch.
 
 ```sh

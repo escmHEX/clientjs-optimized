@@ -8,6 +8,7 @@ function ClientJSFlash() {
   ClientJS.apply(this, arguments);
 }
 inherits(ClientJSFlash, ClientJS);
+ClientJSFlash.prepareFonts = ClientJS.prepareFonts;
 
 ClientJSFlash.prototype.getFlashVersion = getFlashVersion;
 

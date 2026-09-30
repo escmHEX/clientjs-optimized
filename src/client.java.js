@@ -8,6 +8,7 @@ function ClientJSJava() {
   ClientJS.apply(this, arguments);
 }
 inherits(ClientJSJava, ClientJS);
+ClientJSJava.prepareFonts = ClientJS.prepareFonts;
 
 ClientJSJava.prototype.getJavaVersion = getJavaVersion;
 

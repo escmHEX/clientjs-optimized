@@ -24,24 +24,26 @@
  * Usage: d = new Detector();
  *        d.detect('font name');
  */
+function createProbe() {
+    // Keep the exact upstream glyphs and size for both measurement and warming.
+    var span = document.createElement('span');
+    //we test using 72px font size, we may use any size. I guess larger the better.
+    span.style.fontSize = '72px';
+    //we use m or w because these two characters take up the maximum width.
+    // And we use a LLi so that the same matching fonts can get separated
+    span.innerHTML = 'mmmmmmmmmmlli';
+    return span;
+}
+
 module.exports = function Detector() {
     // a font will be compared against all the three default fonts.
     // and if it doesn't match all 3 then that font is not available.
     var baseFonts = ['monospace', 'sans-serif', 'serif'];
 
-    //we use m or w because these two characters take up the maximum width.
-    // And we use a LLi so that the same matching fonts can get separated
-    var testString = "mmmmmmmmmmlli";
-
-    //we test using 72px font size, we may use any size. I guess larger the better.
-    var testSize = '72px';
-
     var h = document.getElementsByTagName("body")[0];
 
     // create a SPAN in the document to get the width of the text we use to test
-    var s = document.createElement("span");
-    s.style.fontSize = testSize;
-    s.innerHTML = testString;
+    var s = createProbe();
     var defaultWidth = {};
     var defaultHeight = {};
     for (var index in baseFonts) {
@@ -96,5 +98,49 @@ module.exports = function Detector() {
             for (var i = 0; i < nodes.length; i++) h.removeChild(nodes[i]);
         }
         return results;
+    };
+};
+
+// Opt-in cache warming, never a font-result cache. Each task leaves no nodes.
+// Skip declared web fonts so preparation cannot start their downloads earlier.
+module.exports.prepareFonts = function(fonts, batchSize) {
+    var next = 0;
+    var template = createProbe();
+    var timer = setTimeout(step, 0);
+
+    function step() {
+        timer = null;
+        var declared = new Set();
+        document.fonts.forEach(function(face) {
+            declared.add(face.family.replace(/^['"]|['"]$/g, '').toLowerCase());
+        });
+        var fragment = document.createDocumentFragment();
+        var nodes = [];
+        var end = Math.min(next + batchSize, fonts.length);
+        while (next < end) {
+            var font = fonts[next++];
+            if (declared.has(font.toLowerCase())) continue;
+            var node = template.cloneNode(true);
+            node.style.fontFamily = font + ',monospace';
+            nodes.push(node);
+            fragment.appendChild(node);
+        }
+        if (nodes.length) {
+            document.body.appendChild(fragment);
+            try {
+                // One read resolves the whole batch; discard its metrics.
+                void nodes[nodes.length - 1].offsetWidth;
+            } finally {
+                for (var i = 0; i < nodes.length; i++) document.body.removeChild(nodes[i]);
+            }
+        }
+        if (next < fonts.length) timer = setTimeout(step, 0);
+        else template = null;
+    }
+
+    return function cancel() {
+        if (timer !== null) clearTimeout(timer);
+        timer = null;
+        template = null;
     };
 };

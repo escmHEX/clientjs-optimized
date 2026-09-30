@@ -9,6 +9,7 @@ function ClientJSFull() {
   ClientJS.apply(this, arguments);
 }
 inherits(ClientJSFull, ClientJS);
+ClientJSFull.prepareFonts = ClientJS.prepareFonts;
 
 ClientJSFull.prototype.getJavaVersion = getJavaVersion;
 ClientJSFull.prototype.getFlashVersion = getFlashVersion;
